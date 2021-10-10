@@ -189,8 +189,6 @@ TEST_CASE("parse header, rfc8288 ex 5") {
     CHECK(links[1].targetAttributes.empty());
 }
 
-// <https://example.org/>; rel="start", <https://example.org/index>; rel="index"
-
 TEST_CASE("parse header, rfc8288 ex 6") {
     auto links = http_link_header::parse(R"(<https://example.org/>; rel="start", <https://example.org/index>; rel="index")");
 
@@ -219,18 +217,85 @@ TEST_CASE("empty link target") {
     CHECK(links[0].linkTarget == "");
 
     CHECK(links[0].targetAttributes.empty());
-
 }
 
-TEST_CASE("resolve against baseuri ") {
-    auto links = http_link_header::parse(R"(</terms>; rel="copyright")", "http://example.org");
+TEST_CASE("resolve uri, test 1") {
+    std::string baseUri = "http://a/b/c/d;p?q";
+    std::string uriToResolve = "g";
+    std::string result;
+
+    CHECK(http_link_header::uri::resolve(&baseUri, &uriToResolve, &result));
+    CHECK(result == "http://a/b/c/g");
+}
+
+TEST_CASE("resolve uri, test 2") {
+    std::string baseUri = "http://a/b/c/d;p?q";
+    std::string uriToResolve = "g/";
+    std::string result;
+
+    CHECK(http_link_header::uri::resolve(&baseUri, &uriToResolve, &result));
+    CHECK(result == "http://a/b/c/g/");
+}
+
+TEST_CASE("resolve uri, test 3") {
+    std::string baseUri = "http://a/b/c/d;p?q";
+    std::string uriToResolve = "/g";
+    std::string result;
+
+    CHECK(http_link_header::uri::resolve(&baseUri, &uriToResolve, &result));
+    CHECK(result == "http://a/g");
+}
+
+TEST_CASE("resolve uri, test 4") {
+    std::string baseUri = "http://a/b/c/d;p?q";
+    std::string uriToResolve = "#s";
+    std::string result;
+
+    CHECK(http_link_header::uri::resolve(&baseUri, &uriToResolve, &result));
+    CHECK(result == "http://a/b/c/d;p?q#s");
+}
+
+TEST_CASE("resolve uri, test 5") {
+    std::string baseUri = "http://a/b/c/d;p?q";
+    std::string uriToResolve = "../";
+    std::string result;
+
+    CHECK(http_link_header::uri::resolve(&baseUri, &uriToResolve, &result));
+    CHECK(result == "http://a/b/");
+}
+
+TEST_CASE("resolve against baseuri, test 1") {
+    auto links = http_link_header::parse(R"(<terms>; rel="copyright")", "http://example.org/a/b");
 
     CHECK(links.size() == 1);
 
-    CHECK(links[0].linkContext == "");
+    CHECK(links[0].linkContext == "http://example.org/a/b");
+    CHECK(links[0].linkRelation == "copyright");
+    CHECK(links[0].linkTarget == "http://example.org/a/terms");
+
+    CHECK(links[0].targetAttributes.empty());
+}
+
+TEST_CASE("resolve against baseuri, test 2") {
+    auto links = http_link_header::parse(R"(<../terms>; rel="copyright")", "http://example.org/a/b");
+
+    CHECK(links.size() == 1);
+
+    CHECK(links[0].linkContext == "http://example.org/a/b");
     CHECK(links[0].linkRelation == "copyright");
     CHECK(links[0].linkTarget == "http://example.org/terms");
 
     CHECK(links[0].targetAttributes.empty());
+}
 
+TEST_CASE("override baseuri with anchor attribute") {
+    auto links = http_link_header::parse(R"(<../terms>; rel="copyright"; anchor="#foo")", "http://example.org/a/b");
+
+    CHECK(links.size() == 1);
+
+    CHECK(links[0].linkContext == "http://example.org/a/b#foo");
+    CHECK(links[0].linkRelation == "copyright");
+    CHECK(links[0].linkTarget == "http://example.org/terms");
+
+    CHECK(links[0].targetAttributes.empty());
 }

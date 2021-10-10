@@ -1,6 +1,8 @@
 #ifndef HTTP_LINK_HEADER_H
 #define HTTP_LINK_HEADER_H
 
+#include <uriparser/Uri.h>
+
 #include <string>
 #include <set>
 #include <vector>
@@ -30,6 +32,110 @@ namespace http_link_header {
                 if(!token.empty())
                     tokens.push_back(token);
             return tokens;
+        }
+
+    }
+
+    namespace uri {
+
+        class Uri {
+        public:
+            Uri() {
+                // Initialize the UriUriA struct this class wraps to a sane state.
+                memset(static_cast<void *>(&uri_), 0, sizeof(UriUriA));
+            }
+
+            ~Uri() {
+                uriFreeUriMembersA(&uri_);
+            }
+
+            UriUriA* get_mutable_uri() {
+                return &uri_;
+            }
+
+            UriUriA* get_uri() const {
+                return const_cast<UriUriA*>(&uri_);
+            }
+
+            /**
+             * Is this URI absolute? (Does it have a "scheme"?)
+             */
+            bool isAbsolute() const {
+                if(!uri_.scheme.first || !uri_.scheme.afterLast)
+                    return false;
+                return true;
+            }
+
+        private:
+            UriUriA uri_;
+        };
+
+        /**
+         * "Relatively Resolve" the uriToResolve against the baseUri and store the
+         * resolvedUri into result.
+         *
+         * See [RFC3986], Section 5.2.
+         *
+         * @param baseUri the base URI to resolve against
+         * @param uriToResolve the URI to resolve
+         * @param result where to store the result
+         * @return true is resolution if successful
+         */
+        bool resolve(const std::string *baseUri, const std::string *uriToResolve, std::string *result) {
+
+            Uri base_uri;
+            {
+                UriParserStateA state;
+                state.uri = base_uri.get_mutable_uri();
+                if (uriParseUriA(&state, baseUri->c_str()) != URI_SUCCESS) {
+                    return false;
+                }
+                if(!base_uri.isAbsolute())
+                    return false;
+            }
+
+            Uri relative_uri;
+            {
+                UriParserStateA state;
+                state.uri = relative_uri.get_mutable_uri();
+                if (uriParseUriA(&state, uriToResolve->c_str()) != URI_SUCCESS) {
+                    return false;
+                }
+            }
+
+            Uri result_uri;
+
+//            if(uriAddBaseUriA(
+//                    result_uri.get_mutable_uri(),
+//                    relative_uri.get_uri(),
+//                    base_uri.get_uri()) != URI_SUCCESS)
+            int res = uriAddBaseUriA(
+                    result_uri.get_mutable_uri(),
+                    relative_uri.get_uri(),
+                    base_uri.get_uri());
+            if(res != URI_SUCCESS)
+
+                return false;
+
+            int chars_required;
+            if (uriToStringCharsRequiredA(result_uri.get_uri(),
+                                          &chars_required) != URI_SUCCESS) {
+                return false;
+            }
+            char* dest_str = (char*)malloc(chars_required+1);
+            if (!dest_str) {
+                return false;
+            }
+            int chars_written;
+            if (uriToStringA(dest_str, result_uri.get_uri(),
+                             chars_required+1, &chars_written) != URI_SUCCESS) {
+                free(dest_str);
+                return false;
+            }
+            *result = dest_str;
+            free(dest_str);
+
+            return true;
         }
 
     }
@@ -283,11 +389,9 @@ namespace http_link_header {
             // 8. Let target_uri be the result of relatively resolving (as per
             //   [RFC3986], Section 5.2) target_string.  Note that any base
             //   URI carried in the payload body is NOT used.
-            std::string target_uri = target_string; // todo: resolve with baseUri
-            bool resolveSuccess = uriAddBaseUriA(pimpl_->get_mutable_uri(),
-                                  relative.pimpl_->get_uri(),
-                                  base.pimpl_->get_uri()) == URI_SUCCESS;
-
+            std::string target_uri;
+            if(!uri::resolve(&baseUri, &target_string, &target_uri))
+                target_uri = target_string;
 
             // 9. Let relations_string be the second item of the first tuple
             //    of link_parameters whose first item matches the string "rel"
@@ -333,7 +437,9 @@ namespace http_link_header {
             //     per [RFC3986], Section 5.2) context_string, unless
             //     context_string is null, in which case context is null.  Note
             //     that any base URI carried in the payload body is NOT used.
-            std::string context_uri = context_string; // todo: resolve with baseUri
+            std::string context_uri;// = context_string; // todo: resolve with baseUri
+            if(!uri::resolve(&baseUri, &context_string, &context_uri))
+                context_uri = context_string;
 
             // 13. Let target_attributes be an empty list.
             std::vector<TargetAttribute> target_attributes;
