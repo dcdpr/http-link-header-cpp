@@ -51,34 +51,6 @@ TEST_CASE("parsing vector of header strings with two Link header strings returns
     CHECK(http_link_header::parse(headers).size() == 4);
 }
 
-TEST_CASE("split empty string returns empty vector") {
-    CHECK(http_link_header::detail::split("", '.').empty());
-}
-
-TEST_CASE("split string without embedded delimiter character returns string") {
-    std::vector<std::string> parts = http_link_header::detail::split("hello", '.');
-    CHECK(parts.size() == 1);
-    CHECK(parts[0] == "hello");
-}
-
-TEST_CASE("split string returns multiple substrings") {
-    std::vector<std::string> parts = http_link_header::detail::split("hello, how are you?", ' ');
-    CHECK(parts.size() == 4);
-    CHECK(parts[0] == "hello,");
-    CHECK(parts[1] == "how");
-    CHECK(parts[2] == "are");
-    CHECK(parts[3] == "you?");
-}
-
-TEST_CASE("split string with consecutive delimiters returns only non-empty substrings") {
-    std::vector<std::string> parts = http_link_header::detail::split("  hello,  how    are you? ", ' ');
-    CHECK(parts.size() == 4);
-    CHECK(parts[0] == "hello,");
-    CHECK(parts[1] == "how");
-    CHECK(parts[2] == "are");
-    CHECK(parts[3] == "you?");
-}
-
 TEST_CASE("create Link objects with subparts") {
 
     http_link_header::Link link{"a", "b", "c"};

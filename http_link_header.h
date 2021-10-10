@@ -11,39 +11,11 @@
 
 namespace http_link_header {
 
-    namespace detail {
-
-        /**
-         * Splits string by delimiter character and returns vector of non-empty substrings
-         *
-         * Consectutive delimiter characters would cause empty substrings, so they are removed
-         * before returning.
-         *
-         * @param s the string to split
-         * @param delimiter the delimiter character
-         * @return vector of zero or more non-empty substrings
-         */
-        std::vector<std::string> split(const std::string& s, char delimiter)
-        {
-            std::vector<std::string> tokens;
-            std::string token;
-            std::istringstream stream(s);
-            while (std::getline(stream, token, delimiter))
-                if(!token.empty())
-                    tokens.push_back(token);
-            return tokens;
-        }
-
-    }
-
     namespace uri {
 
         class Uri {
         public:
-            Uri() {
-                // Initialize the UriUriA struct this class wraps to a sane state.
-                memset(static_cast<void *>(&uri_), 0, sizeof(UriUriA));
-            }
+            Uri() = default;
 
             ~Uri() {
                 uriFreeUriMembersA(&uri_);
@@ -67,7 +39,7 @@ namespace http_link_header {
             }
 
         private:
-            UriUriA uri_;
+            UriUriA uri_{};
         };
 
         /**
@@ -83,57 +55,50 @@ namespace http_link_header {
          */
         bool resolve(const std::string *baseUri, const std::string *uriToResolve, std::string *result) {
 
+            // set up Uri wrapper objects for uriparser library calls
+
+            UriParserStateA state;
+
             Uri base_uri;
-            {
-                UriParserStateA state;
-                state.uri = base_uri.get_mutable_uri();
-                if (uriParseUriA(&state, baseUri->c_str()) != URI_SUCCESS) {
-                    return false;
-                }
-                if(!base_uri.isAbsolute())
-                    return false;
+            state.uri = base_uri.get_mutable_uri();
+            if (uriParseUriA(&state, baseUri->c_str()) != URI_SUCCESS) {
+                return false;
             }
+            if(!base_uri.isAbsolute())
+                return false;
 
             Uri relative_uri;
-            {
-                UriParserStateA state;
-                state.uri = relative_uri.get_mutable_uri();
-                if (uriParseUriA(&state, uriToResolve->c_str()) != URI_SUCCESS) {
-                    return false;
-                }
+            state.uri = relative_uri.get_mutable_uri();
+            if (uriParseUriA(&state, uriToResolve->c_str()) != URI_SUCCESS) {
+                return false;
             }
 
-            Uri result_uri;
+            // resolve the uri
 
-//            if(uriAddBaseUriA(
-//                    result_uri.get_mutable_uri(),
-//                    relative_uri.get_uri(),
-//                    base_uri.get_uri()) != URI_SUCCESS)
-            int res = uriAddBaseUriA(
+            Uri result_uri;
+            if(uriAddBaseUriA(
                     result_uri.get_mutable_uri(),
                     relative_uri.get_uri(),
-                    base_uri.get_uri());
-            if(res != URI_SUCCESS)
-
+                    base_uri.get_uri()) != URI_SUCCESS)
                 return false;
+
+            // convert uri to string and return
 
             int chars_required;
             if (uriToStringCharsRequiredA(result_uri.get_uri(),
                                           &chars_required) != URI_SUCCESS) {
                 return false;
             }
-            char* dest_str = (char*)malloc(chars_required+1);
+            std::unique_ptr<char> dest_str(new char[chars_required+1]);
             if (!dest_str) {
                 return false;
             }
             int chars_written;
-            if (uriToStringA(dest_str, result_uri.get_uri(),
+            if (uriToStringA(dest_str.get(), result_uri.get_uri(),
                              chars_required+1, &chars_written) != URI_SUCCESS) {
-                free(dest_str);
                 return false;
             }
-            *result = dest_str;
-            free(dest_str);
+            *result = dest_str.get();
 
             return true;
         }
@@ -307,12 +272,13 @@ namespace http_link_header {
                 //        Continue processing input if an unrecoverable error is
                 //        encountered.
                 if(parameter_name[parameter_name.size()-1] == '*') {
-                    // TBD
+                    // todo ...
                 }
             }
             else {
                 // 2.8. Else:
                 // 2.8.1. Let parameter_value be an empty string.
+                parameter_value = "";
             }
 
             // 2.9. Case-normalise parameter_name to lowercase.
@@ -340,7 +306,7 @@ namespace http_link_header {
         return parameters;
     }
 
-/**
+    /**
      * Parses zero or more comma-separated link-values from a Link header field
      *
      * @param linkHeaderField string containing the value of a Link header field
@@ -437,7 +403,7 @@ namespace http_link_header {
             //     per [RFC3986], Section 5.2) context_string, unless
             //     context_string is null, in which case context is null.  Note
             //     that any base URI carried in the payload body is NOT used.
-            std::string context_uri;// = context_string; // todo: resolve with baseUri
+            std::string context_uri;
             if(!uri::resolve(&baseUri, &context_string, &context_uri))
                 context_uri = context_string;
 
@@ -508,17 +474,16 @@ namespace http_link_header {
                 }
             }
 
-            // 17.  For each relation_type in relation_types:
+            // 17. For each relation_type in relation_types:
             for(auto relation_type : relation_types) {
-                // 17.1.  Case-normalise relation_type to lowercase.
+                // 17.1. Case-normalise relation_type to lowercase.
                 std::transform(relation_type.begin(), relation_type.end(),
                                relation_type.begin(), &::tolower);
-                // 17.2.  Append a link object to links with the target
-                //                target_uri, relation type of relation_type, context of
-                //                context_uri, and target attributes target_attributes.
+                // 17.2. Append a link object to links with the target
+                //       target_uri, relation type of relation_type, context of
+                //       context_uri, and target attributes target_attributes.
                 links.push_back(Link{context_uri, relation_type, target_uri, target_attributes});
             }
-
         }
 
         return links;
