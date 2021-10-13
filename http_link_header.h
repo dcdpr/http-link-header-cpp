@@ -53,7 +53,7 @@ namespace http_link_header {
          * @param result where to store the result
          * @return true is resolution if successful
          */
-        bool resolve(const std::string *baseUri, const std::string *uriToResolve, std::string *result) {
+        inline bool resolve(const std::string *baseUri, const std::string *uriToResolve, std::string *result) {
 
             // set up Uri wrapper objects for uriparser library calls
 
@@ -147,7 +147,7 @@ namespace http_link_header {
      * @param input current value of the header string
      * @return unquoted string
      */
-    std::string parseQuotedString(std::string &input) {
+    inline std::string parseQuotedString(std::string &input) {
 
         // 1. Let output be an empty string.
         std::string output;
@@ -196,7 +196,7 @@ namespace http_link_header {
         return output;
     }
 
-    std::vector<TargetAttribute> parseParameters(std::string & input) {
+    inline std::vector<TargetAttribute> parseParameters(std::string & input) {
 
         std::string whitespace = " \t";
 
@@ -313,7 +313,7 @@ namespace http_link_header {
      *
      * @return vector of zero or more Link objects
      */
-    std::vector<Link> parse(const std::string& linkHeaderField, const std::string &baseUri = "") {
+    inline std::vector<Link> parse(const std::string& linkHeaderField, const std::string &baseUri = "") {
 
         std::vector<Link> links;
 
@@ -496,7 +496,7 @@ namespace http_link_header {
      *
      * @return vector of zero or more Link objects
      */
-    std::vector<Link> parse(const std::vector<std::string>& headers, const std::string &baseUri = "") {
+    inline std::vector<Link> parse(const std::vector<std::string>& headers, const std::string &baseUri = "") {
         std::vector<Link> links;
 
         if(headers.empty())
@@ -510,8 +510,6 @@ namespace http_link_header {
         return links;
     }
 
-
 }
-
 
 #endif //HTTP_LINK_HEADER_H
