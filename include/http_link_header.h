@@ -8,6 +8,9 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <memory>
+#include <algorithm>
+
 
 namespace http_link_header {
 
