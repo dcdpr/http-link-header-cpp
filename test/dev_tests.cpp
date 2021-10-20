@@ -119,64 +119,64 @@ TEST_CASE("parse header, check parts, test2") {
     CHECK(links[0].targetAttributes[0].value == "next chapter");
 }
 
-TEST_CASE("parse header, rfc8288 ex 2") {
-    auto links = http_link_header::parse(R"(</>; rel="https://example.net/foo")");
+TEST_CASE("empty link target") {
+    auto links = http_link_header::parse(R"(<>; rel="start")");
 
     CHECK(links.size() == 1);
 
-    CHECK(links[0].linkContext.empty());
-    CHECK(links[0].linkRelation == "https://example.net/foo");
-    CHECK(links[0].linkTarget == "/");
+    CHECK(links[0].linkContext == "");
+    CHECK(links[0].linkRelation == "start");
+    CHECK(links[0].linkTarget == "");
 
-    CHECK(links[0].targetAttributes.size() == 0);
+    CHECK(links[0].targetAttributes.empty());
 }
 
-TEST_CASE("parse header, rfc8288 ex 3") {
-    auto links = http_link_header::parse(R"(</terms>; rel="copyright"; anchor="#foo")");
+TEST_CASE("quoted parameter values") {
+    auto links = http_link_header::parse(R"(<http://example.org>; foo="bar"; bar="foo")");
 
     CHECK(links.size() == 1);
 
-    CHECK(links[0].linkContext == "#foo");
-    CHECK(links[0].linkRelation == "copyright");
-    CHECK(links[0].linkTarget == "/terms");
-
-    CHECK(links[0].targetAttributes.empty());
+    CHECK(links[0].targetAttributes.size() == 2);
+    CHECK(links[0].targetAttributes[0].name == "foo");
+    CHECK(links[0].targetAttributes[0].value == "bar");
+    CHECK(links[0].targetAttributes[1].name == "bar");
+    CHECK(links[0].targetAttributes[1].value == "foo");
 }
 
-TEST_CASE("parse header, rfc8288 ex 5") {
-    auto links = http_link_header::parse(R"(<https://example.org/>;  rel="start https://example.net/relation/other")");
+TEST_CASE("unquoted parameter values") {
+    auto links = http_link_header::parse(R"(<http://example.org>; foo=bar; bar=foo)");
 
-    CHECK(links.size() == 2);
+    CHECK(links.size() == 1);
 
-    CHECK(links[0].linkContext == "");
-    CHECK(links[0].linkRelation == "start");
-    CHECK(links[0].linkTarget == "https://example.org/");
-
-    CHECK(links[0].targetAttributes.empty());
-
-    CHECK(links[1].linkContext == "");
-    CHECK(links[1].linkRelation == "https://example.net/relation/other");
-    CHECK(links[1].linkTarget == "https://example.org/");
-
-    CHECK(links[1].targetAttributes.empty());
+    CHECK(links[0].targetAttributes.size() == 2);
+    CHECK(links[0].targetAttributes[0].name == "foo");
+    CHECK(links[0].targetAttributes[0].value == "bar");
+    CHECK(links[0].targetAttributes[1].name == "bar");
+    CHECK(links[0].targetAttributes[1].value == "foo");
 }
 
-TEST_CASE("parse header, rfc8288 ex 6") {
-    auto links = http_link_header::parse(R"(<https://example.org/>; rel="start", <https://example.org/index>; rel="index")");
+TEST_CASE("mixed quoted parameter values, unquoted-quoted") {
+    auto links = http_link_header::parse(R"(<http://example.org>; foo=bar; bar="foo")");
 
-    CHECK(links.size() == 2);
+    CHECK(links.size() == 1);
 
-    CHECK(links[0].linkContext == "");
-    CHECK(links[0].linkRelation == "start");
-    CHECK(links[0].linkTarget == "https://example.org/");
+    CHECK(links[0].targetAttributes.size() == 2);
+    CHECK(links[0].targetAttributes[0].name == "foo");
+    CHECK(links[0].targetAttributes[0].value == "bar");
+    CHECK(links[0].targetAttributes[1].name == "bar");
+    CHECK(links[0].targetAttributes[1].value == "foo");
+}
 
-    CHECK(links[0].targetAttributes.empty());
+TEST_CASE("mixed quoted parameter values, quoted-unquoted") {
+    auto links = http_link_header::parse(R"(<http://example.org>; foo="bar"; bar=foo)");
 
-    CHECK(links[1].linkContext == "");
-    CHECK(links[1].linkRelation == "index");
-    CHECK(links[1].linkTarget == "https://example.org/index");
+    CHECK(links.size() == 1);
 
-    CHECK(links[1].targetAttributes.empty());
+    CHECK(links[0].targetAttributes.size() == 2);
+    CHECK(links[0].targetAttributes[0].name == "foo");
+    CHECK(links[0].targetAttributes[0].value == "bar");
+    CHECK(links[0].targetAttributes[1].name == "bar");
+    CHECK(links[0].targetAttributes[1].value == "foo");
 }
 
 TEST_CASE("empty link target") {

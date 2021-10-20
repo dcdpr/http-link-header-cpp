@@ -2,39 +2,41 @@ cmake_minimum_required(VERSION 3.1)
 
 project(
         "http_link_header"
-        VERSION 1.0.0
+        VERSION 0.9.0
         DESCRIPTION
         "A header only c++ library that can parse HTTP Link: header fields as described in RFC8288."
         HOMEPAGE_URL "https://github.com/dcdpr/http_link_header-cpp"
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
-
-if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-  set(CXX_FLAGS -Wall -Wextra -Wpedantic -Wno-unknown-pragmas ${CXX_FLAGS})
-elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang)
-  set(CXX_FLAGS -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded ${CXX_FLAGS})
-endif()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(uriparser 0.9.5 CONFIG REQUIRED char wchar_t)
 
 add_library(${PROJECT_NAME} INTERFACE)
-# add alias so the project can be uses with add_subdirectory
+# add alias so the project can be embedded by others and used with add_subdirectory()
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 include(GNUInstallDirs)
 include(CTest)
 
+# determine if we are building http_link_header itself, or if we are embedded in another project
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(IS_TOPLEVEL_PROJECT TRUE)
 else()
   set(IS_TOPLEVEL_PROJECT FALSE)
 endif()
 
+# only enable installing if we aren't embedded in another project
 option(HLH_INSTALL_LIBRARY
         "Enable installing of http_link_header library into default locations"
         ${IS_TOPLEVEL_PROJECT})
-option(HLH_BUILD_TESTING "Build and run http_link_header tests " ${IS_TOPLEVEL_PROJECT})
+
+# only enable tests if we aren't embedded in another project
+option(HLH_BUILD_TESTING
+        "Enable building and running http_link_header tests"
+        ${IS_TOPLEVEL_PROJECT})
 
 target_include_directories(
         ${PROJECT_NAME}

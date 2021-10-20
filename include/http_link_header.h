@@ -263,10 +263,13 @@ namespace http_link_header {
                 //        and let the results be parameter_value.
                 else {
                     stopChars = ";,";
-                    strBegin = input.find_first_not_of(stopChars);
+                    strBegin = input.find_first_of(stopChars);
                     if(strBegin != std::string::npos) {
-                        parameter_value = input.substr(strBegin - 1);
+                        parameter_value = input.substr(0, strBegin);
                         input = input.substr(strBegin);
+                    } else {
+                        parameter_value = input;
+                        input = "";
                     }
                 }
 
