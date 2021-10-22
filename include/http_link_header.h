@@ -238,6 +238,9 @@ namespace http_link_header {
             strBegin = input.find_first_not_of(whitespace);
             if(strBegin != std::string::npos)
                 input = input.substr(strBegin);
+            else
+                // the rest of input is just whitespace, so get rid of it
+                input = "";
 
             std::string parameter_value;
 
@@ -250,6 +253,9 @@ namespace http_link_header {
                 strBegin = input.find_first_not_of(whitespace);
                 if(strBegin != std::string::npos)
                     input = input.substr(strBegin);
+                else
+                    // the rest of input is just whitespace, so get rid of it
+                    input = "";
 
                 // 2.7.3. If the next character is DQUOTE, let parameter_value be
                 //        the result of Parsing a Quoted String (Appendix B.4)
