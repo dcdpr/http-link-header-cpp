@@ -279,6 +279,24 @@ TEST_CASE("override baseuri with anchor attribute") {
     CHECK(links[0].targetAttributes.empty());
 }
 
+TEST_CASE("multiple relations generate multiple Links") {
+    auto links = http_link_header::parse(R"(<http://example.org>; rel="one two" )");
+
+    CHECK(links.size() == 2);
+
+    CHECK(links[0].linkContext == "");
+    CHECK(links[0].linkRelation == "one");
+    CHECK(links[0].linkTarget == "http://example.org");
+
+    CHECK(links[0].targetAttributes.empty());
+
+    CHECK(links[1].linkContext == "");
+    CHECK(links[1].linkRelation == "two");
+    CHECK(links[1].linkTarget == "http://example.org");
+
+    CHECK(links[1].targetAttributes.empty());
+}
+
 TEST_CASE("badly formed parameters, missing value") {
     auto links = http_link_header::parse(R"(<http://example.org>; a= )");
 
@@ -310,8 +328,8 @@ TEST_CASE("badly formed parameters, missing value and =") {
 TEST_CASE("badly formed parameters, missing name") {
     auto links = http_link_header::parse(R"(<http://example.org>; =1 )");
 
-    // todo: check if this should be valid?
-    // todo: should we be removing tailing whitespace from the param value?
+    // todo: check if having empty param name should be valid?
+    // todo: should we be removing trailing whitespace from the param value?
 
     CHECK(links.size() == 1);
 
@@ -322,5 +340,41 @@ TEST_CASE("badly formed parameters, missing name") {
     CHECK(links[0].targetAttributes.size() == 1);
     CHECK(links[0].targetAttributes[0].name == "");
     CHECK(links[0].targetAttributes[0].value == "1 ");
+}
+
+TEST_CASE("badly formed parameters, missing end quote for relations") {
+    auto links = http_link_header::parse(R"(<http://example.org>; rel="one two )");
+
+    CHECK(links.size() == 2);
+
+    CHECK(links[0].linkContext == "");
+    CHECK(links[0].linkRelation == "one");
+    CHECK(links[0].linkTarget == "http://example.org");
+
+    CHECK(links[0].targetAttributes.empty());
+
+    CHECK(links[1].linkContext == "");
+    CHECK(links[1].linkRelation == "two");
+    CHECK(links[1].linkTarget == "http://example.org");
+
+    CHECK(links[1].targetAttributes.empty());
+}
+
+TEST_CASE("badly formed parameters, missing start quote for relations") {
+    auto links = http_link_header::parse(R"(<http://example.org>; rel=one two" )");
+
+    CHECK(links.size() == 2);
+
+    CHECK(links[0].linkContext == "");
+    CHECK(links[0].linkRelation == "one");
+    CHECK(links[0].linkTarget == "http://example.org");
+
+    CHECK(links[0].targetAttributes.empty());
+
+    CHECK(links[1].linkContext == "");
+    CHECK(links[1].linkRelation == "two\"");
+    CHECK(links[1].linkTarget == "http://example.org");
+
+    CHECK(links[1].targetAttributes.empty());
 }
 
