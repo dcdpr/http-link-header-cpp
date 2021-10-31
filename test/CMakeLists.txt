@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 add_executable(tests)
 target_sources(
         tests
-        PRIVATE dev_tests.cpp rfc_tests.cpp)
+        PRIVATE dev_tests.cpp rfc_tests.cpp readme_tests.cpp)
 target_include_directories(
         tests PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>)
