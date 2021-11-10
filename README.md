@@ -1,4 +1,4 @@
-# http_link_header
+# http-link-header-cpp
 
 Minimal HTTP "Link:" header parser.
 
@@ -7,7 +7,7 @@ the relationships between resources on the Web ("links") and the type of those
 relationships ("link relation types"). It also defines the serialization of
 such links in HTTP headers with the "Link:" header field.
 
-`http_link_header` is a "header-only" C++ library for parsing HTTP "Link:" headers.
+`http-link-header-cpp` is a "header-only" C++ library for parsing HTTP "Link:" headers.
 
 ## Usage Examples
 
@@ -55,12 +55,12 @@ such links in HTTP headers with the "Link:" header field.
 
 ## Building
 
-`http_link_header` is a header-only C++11 library. Building can be done with cmake > 3.1 and has been tested with g++ and clang compilers. 
+`http-link-header-cpp` is a header-only C++11 library. Building can be done with cmake >= 3.1 and has been tested with g++ and clang compilers. 
 
-`http_link_header` uses a pretty standard cmake build system. After cloning the repository, execute the following:
+`http-link-header-cpp` uses a pretty standard cmake build system. After cloning the repository, execute the following:
 
-```bash
-cd http_link_header
+```shell
+cd http-link-header-cpp
 mkdir build
 cd build
 cmake ..
@@ -69,66 +69,66 @@ cmake --build . --config Release
 
 You can also run all the tests:
 
-```
+```shell
 make test
 ```
 
 ## Dependencies
 
-`http_link_header` has a dependency on [uriparser](https://github.com/uriparser/uriparser/)
-which it uses when resolving URI references. Any project using `http_link_header` should also be able to find a copy of
+`http-link-header-cpp` has a dependency on [uriparser](https://github.com/uriparser/uriparser/)
+which it uses when resolving URI references. Any project using `http-link-header-cpp` should also be able to find a copy of
 uriparser. uriparser should either be installed locally or included within the the project's code.
 
 ## Installing
 
-`http_link_header` will install its header file, `http_link_header.h`, and a few cmake helper files that can be used by other
-projects to find and use `http_link_header`.
+`http-link-header-cpp` will install its header file, `http-link-header.h`, and a few cmake helper files that can be used by other
+projects to find and use `http-link-header-cpp`.
 
-The default installation locations for `http_link_header` are `/usr/local/include` and `/usr/local/share`.
+The default installation locations for `http-link-header-cpp` are `/usr/local/include` and `/usr/local/share`.
 
 To install using cmake after building and testing, execute the following:
 
-```bash
+```shell
 cmake --build . --config Release --target install
 ```
 
 You should see output similar to:
 
-```bash
--- Installing: /usr/local/share/http_link_header/cmake/http_link_headerTargets.cmake
--- Installing: /usr/local/share/http_link_header/cmake/http_link_headerConfig.cmake
--- Installing: /usr/local/share/http_link_header/cmake/http_link_headerConfigVersion.cmake
--- Installing: /usr/local/include/http_link_header.h
+```shell
+-- Installing: /usr/local/share/http-link-header-cpp/cmake/http-link-headerTargets.cmake
+-- Installing: /usr/local/share/http-link-header-cpp/cmake/http-link-headerConfig.cmake
+-- Installing: /usr/local/share/http-link-header-cpp/cmake/http-link-headerConfigVersion.cmake
+-- Installing: /usr/local/include/http-link-header.h
 ```
 
 If you want the files to be installed somewhere different, you can set the installation prefix when running the initial cmake command. For example:
 
 ```shell
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/http_link_header-install ..
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/http-link-header-cpp-install ..
 cmake --build . --config Release --target install
 ```
 
-## Using http_link_header in your projects
+## Using http-link-header-cpp
 
 ### After installing
 
-Once `http_link_library` is installed, you can use it in your project with a simple cmake `find_package` command. Be
+Once `http-link-header-cpp` is installed, you can use it in your project with a simple cmake `find_package()` command. Be
 sure to mark it as using `CONFIG` mode since we just installed those config files. Also mark it as required if your
-projects requires `http_link_library`.
+project requires `http-link-header-cpp`.
 
 ```shell
-find_package("http_link_header" CONFIG REQUIRED)
+find_package("http-link-header-cpp" CONFIG REQUIRED)
 ```
 
 ### Not installing
 
-You can use `http_link_header` in your project without installing it at all. This will require a little more
+You can use `http-link-header-cpp` in your project without installing it at all. This will require a little more
 configuration.
 
-Once you put the `http_link_header` files somewhere (likely within your own project), then you use
-cmake's `add_subdirectory()`. You will want to make sure not to install `http_link_header` during your install process
+Once you put the `http-link-header-cpp` files somewhere (likely within your own project), then you use
+cmake's `add_subdirectory()`. You will want to make sure not to install `http-link-header-cpp` during your install process
 by using the `EXCLUDE_FROM_ALL` option.
 
 ```shell
-add_subdirectory(path/to/http_link_header ${PROJECT_BINARY_DIR}/http_link_header-build EXCLUDE_FROM_ALL)
+add_subdirectory(path/to/http-link-header-cpp ${PROJECT_BINARY_DIR}/http-link-header-cpp-build EXCLUDE_FROM_ALL)
 ```
