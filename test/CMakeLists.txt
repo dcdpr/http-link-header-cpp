@@ -22,6 +22,6 @@ target_compile_options(
         -Wno-zero-as-null-pointer-constant
         -Wno-exit-time-destructors
         -Wno-global-constructors)
-target_link_libraries(tests PUBLIC http_link_header::http_link_header)
+target_link_libraries(tests PUBLIC http-link-header-cpp::http-link-header-cpp)
 
 add_test(NAME tests COMMAND tests)

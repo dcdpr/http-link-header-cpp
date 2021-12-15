@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 
 project(
-        "http_link_header"
+        "http-link-header-cpp"
         VERSION 0.9.0
         DESCRIPTION
         "A header only c++ library that can parse HTTP Link: header fields as described in RFC8288."
-        HOMEPAGE_URL "https://github.com/dcdpr/http_link_header-cpp"
+        HOMEPAGE_URL "https://github.com/dcdpr/http-link-header-cpp"
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -21,8 +21,8 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 include(GNUInstallDirs)
 include(CTest)
 
-# determine if we are building http_link_header itself, or if we are embedded in another project
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+# determine if we are building http-link-header-cpp itself, or if we are embedded in another project
+if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
   set(IS_TOPLEVEL_PROJECT TRUE)
 else()
   set(IS_TOPLEVEL_PROJECT FALSE)
@@ -30,12 +30,12 @@ endif()
 
 # only enable installing if we aren't embedded in another project
 option(HLH_INSTALL_LIBRARY
-        "Enable installing of http_link_header library into default locations"
+        "Enable installing of http-link-header-cpp library into default locations"
         ${IS_TOPLEVEL_PROJECT})
 
 # only enable tests if we aren't embedded in another project
 option(HLH_BUILD_TESTING
-        "Enable building and running http_link_header tests"
+        "Enable building and running http-link-header-cpp tests"
         ${IS_TOPLEVEL_PROJECT})
 
 target_include_directories(
@@ -82,7 +82,7 @@ if(HLH_INSTALL_LIBRARY)
           "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
           DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
-  install(FILES ${PROJECT_SOURCE_DIR}/include/http_link_header.h
+  install(FILES ${PROJECT_SOURCE_DIR}/include/http-link-header.h
           DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 

@@ -1,6 +1,6 @@
 // This file contains tests based on examples given in the README
 
-#include "http_link_header.h"
+#include "http-link-header.h"
 #include "doctest.h"
 
 
