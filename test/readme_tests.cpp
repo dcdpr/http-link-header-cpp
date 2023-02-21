@@ -1,7 +1,7 @@
 // This file contains tests based on examples given in the README
 
-#include "http-link-header.h"
-#include "doctest.h"
+#include <http-link-header/http-link-header.h>
+#include <doctest/doctest.h>
 
 
 TEST_CASE("readme, ex 1") {

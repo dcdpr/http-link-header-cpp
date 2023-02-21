@@ -1,7 +1,7 @@
-#include "http-link-header.h"
+#include <http-link-header/http-link-header.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <doctest/doctest.h>
 
 
 static std::string header_previousChapter = // NOLINT(cert-err58-cpp)
