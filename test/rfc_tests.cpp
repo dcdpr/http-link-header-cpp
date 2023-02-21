@@ -1,8 +1,8 @@
 // This file contains tests based on examples given in RFC8288
 // see: https://datatracker.ietf.org/doc/html/rfc8288#section-3.5
 
-#include "http-link-header.h"
-#include "doctest.h"
+#include <http-link-header/http-link-header.h>
+#include <doctest/doctest.h>
 
 
 TEST_CASE("parse header, rfc8288 ex 1") {
