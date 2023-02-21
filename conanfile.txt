@@ -1,0 +1,12 @@
+[requires]
+uriparser/0.9.7
+
+[build_requires]
+doctest/2.4.9
+
+[generators]
+cmake
+
+[imports]
+bin, *.dll -> ./bin # Copies all dll files from packages bin folder to my local "bin" folder
+lib, *.dylib* -> ./lib # Copies all dylib files from packages lib folder to my local "lib" folder
